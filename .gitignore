@@ -16,6 +16,8 @@
 # next.js
 /.next/
 /out/
+# custom distDir (next.config.ts) — avoids committing dev cache (.sst) and builds
+/dist/
 
 # production
 /build

@@ -25,6 +25,7 @@ import {
   Download,
 } from "lucide-react";
 import { useState, useEffect, useCallback, useRef } from "react";
+import { INVISIBLE_OS_HELP_TEXT } from "@/lib/invisible-os-help-text";
 
 function createSpeechRecognition(): SpeechRecognition | null {
   if (typeof window === "undefined") return null;
@@ -463,6 +464,11 @@ const FINDER_CONTENTS: Record<
   documents: {
     path: "~/Documents",
     entries: [
+      {
+        name: "Invisible-OS-Help.txt",
+        detail: "Plain text · help · voice & terminal",
+        kind: "doc",
+      },
       { name: "Project Zeros Proposal.pdf", detail: "PDF · 2.4 MB", kind: "doc" },
       { name: "Mission Brief.md", detail: "Markdown · edited by voice", kind: "doc" },
       { name: "Launch Checklist.numbers", detail: "Spreadsheet · 8 rows", kind: "doc" },
@@ -1017,6 +1023,10 @@ const TERMINAL_FS: VfsNode = {
             Documents: {
               kind: "dir",
               entries: {
+                "Invisible-OS-Help.txt": {
+                  kind: "file",
+                  content: INVISIBLE_OS_HELP_TEXT,
+                },
                 "readme.txt": {
                   kind: "file",
                   content:
@@ -1550,7 +1560,11 @@ export default function Home() {
           ? "Microphone blocked by the browser."
           : event.error === "audio-capture"
             ? "No microphone detected."
-            : `Speech error: ${event.error}`;
+            : event.error === "network"
+              ? "Can’t reach the speech service (Chrome/Edge send audio to Google). Check internet, try HTTPS, turn off VPN or strict firewall/ad-block, then try again."
+            : event.error === "service-not-allowed"
+              ? "Speech service is not allowed in this context (try HTTPS, or another browser)."
+              : `Speech error: ${event.error}`;
       setVoiceError(human);
       voiceSessionActiveRef.current = false;
       recognitionRef.current = null;
@@ -1830,7 +1844,7 @@ export default function Home() {
                 {(voiceError || voiceTranscript || isListening) && (
                   <div className="absolute bottom-0 left-0 right-0 z-[5] px-1 pb-1">
                     {voiceError ? (
-                      <p className="rounded-lg border border-red-500/30 bg-red-950/40 px-3 py-2 text-center text-xs text-red-200">
+                      <p className="max-h-24 overflow-y-auto rounded-lg border border-red-500/30 bg-red-950/40 px-3 py-2 text-center text-xs leading-snug text-red-200">
                         {voiceError}
                       </p>
                     ) : (
